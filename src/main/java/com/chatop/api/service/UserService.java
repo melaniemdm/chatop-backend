@@ -29,9 +29,14 @@ public class UserService {
     public User saveUser(User user){
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
-        // Enregistrer l'utilisateur dans la base de données
+        // Enregistre l'utilisateur dans la base de données
         return userRepository.save(user);
 }
+
+    // Méthode pour trouver un utilisateur par son email
+    public Optional<User> getUserByLogin(String login) {
+        return userRepository.findByEmail(login); // "login" correspond à l'email
+    }
 
 
 }
