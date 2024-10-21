@@ -6,6 +6,7 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Data
@@ -13,6 +14,8 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
+
     // Méthode pour trouver un utilisateur par son ID
     public Optional<User> getUser(final Long id){
         return userRepository.findById(id);
@@ -24,6 +27,9 @@ public class UserService {
         userRepository.deleteById(id);
     }
     public User saveUser(User user){
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+        // Enregistrer l'utilisateur dans la base de données
         return userRepository.save(user);
 }
 
