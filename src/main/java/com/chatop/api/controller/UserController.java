@@ -26,11 +26,11 @@ public class UserController {
         String password = loginRequest.get("password");
 
         // Recherche de l'utilisateur par email
-        Optional<User> foundUser = userService.getUserByLogin(login);
+        Optional<UserDTO> foundUser = userService.getUserByLogin(login);
 
         if (foundUser.isPresent()) {
             // Vérification du mot de passe
-            if (foundUser.get().getPassword().equals(password)) {
+            if (foundUser.equals("password_check")) {
                 // Création objet de réponse JSON directement
                 Map<String, String> response = new HashMap<>();
                 response.put("token", "jwt");

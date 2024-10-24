@@ -39,8 +39,9 @@ public class UserService {
 
 
     // Méthode pour trouver un utilisateur par son email
-    public Optional<User> getUserByLogin(String login) {
-        return userRepository.findByEmail(login); // "login" correspond à l'email
+    public Optional<UserDTO> getUserByLogin(String login) {
+        Optional<User> user = userRepository.findByEmail(login);
+        return user.map(this::entityToDto); // "login" correspond à l'email
     }
     // Méthode pour convertir un User en UserDTO
     public UserDTO entityToDto(User user) {
