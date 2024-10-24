@@ -1,5 +1,6 @@
 package com.chatop.api.controller;
 
+import com.chatop.api.dto.UserDTO;
 import com.chatop.api.model.User;
 import com.chatop.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +53,10 @@ public class UserController {
     }
 
     @GetMapping("/me")
-   public Optional<User> getMe(){
+   public ResponseEntity<UserDTO> getMe(){
         Long id = 1L;
-        return userService.getUser(id);
+        Optional<UserDTO> userDTO = userService.getUser(id);
+        return userDTO.map(ResponseEntity::ok).orElseGet(()-> ResponseEntity.status(404).build());
     }
 
 }
