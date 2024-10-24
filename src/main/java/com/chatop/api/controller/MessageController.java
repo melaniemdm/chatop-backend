@@ -1,6 +1,6 @@
 package com.chatop.api.controller;
 
-import com.chatop.api.model.Message;
+import com.chatop.api.dto.MessageDTO;
 import com.chatop.api.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +16,12 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> createMessage(@RequestBody Message message) {
-        if (message.getMessage() == null || message.getMessage().trim().isEmpty()) {
+    public ResponseEntity<Map<String, String>> createMessage(@RequestBody MessageDTO messageDTO) {
+        if (messageDTO.getMessage() == null || messageDTO.getMessage().trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Message content cannot be null or empty"));
         }
-
-        messageService.createMessage(message);
+// Création du message via service
+        messageService.createMessage(messageDTO);
         Map<String, String> response = new HashMap<>();
         response.put("message", "Message created successfully");
         return ResponseEntity.ok(response);
