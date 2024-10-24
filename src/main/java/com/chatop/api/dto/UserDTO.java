@@ -6,11 +6,11 @@ public class UserDTO {
     private Long id;
     private String name;
     private String email;
+    private String password;  // Ajoutez le champ password
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Getters et Setters
-
+    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -33,6 +33,14 @@ public class UserDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public LocalDateTime getCreatedAt() {

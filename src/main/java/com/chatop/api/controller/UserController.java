@@ -46,9 +46,14 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user){
-        User savedUser = userService.saveUser(user);
-        String token = "jwt";
+    public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
+        // Validez que le password est présent
+        if (userDTO.getPassword() == null || userDTO.getPassword().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Password is required");
+        }
+
+        UserDTO savedUser = userService.saveUser(userDTO);
+        String token = "jwt";  // Vous pouvez générer un vrai token JWT ici
         return ResponseEntity.ok().body("{ \"token\": \"" + token + "\" }");
     }
 

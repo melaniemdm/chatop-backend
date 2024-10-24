@@ -16,6 +16,13 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    public UserDTO saveUser(UserDTO userDTO){
+        User user = dtoToEntity(userDTO);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+        User savedUser = userRepository.save(user);
+        return entityToDto(savedUser);
+    }
 
     // Méthode pour trouver un utilisateur par son ID
     public Optional<UserDTO> getUser(final Long id){
@@ -29,12 +36,7 @@ public class UserService {
     public void deleteUser(final Long id){
         userRepository.deleteById(id);
     }
-    public User saveUser(User user){
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-        // Enregistre l'utilisateur dans la base de données
-        return userRepository.save(user);
-}
+
 
     // Méthode pour trouver un utilisateur par son email
     public Optional<User> getUserByLogin(String login) {
@@ -57,6 +59,7 @@ public class UserService {
         user.setId(userDTO.getId());
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
+        user.setPassword(userDTO.getPassword());
         return user;
     }
 
