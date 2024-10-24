@@ -1,5 +1,6 @@
 package com.chatop.api.service;
 
+import com.chatop.api.dto.RentalDTO;
 import com.chatop.api.model.Rental;
 import com.chatop.api.repository.RentalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,20 +17,19 @@ public class RentalService {
 @Autowired
     private RentalRepository rentalRepository;
 
-//Obtenir liste de tous les rentals
-    public List<Rental>getAllRentals(){
-        //convertion de l'iterable en List
-        Iterable<Rental> rentalIterable = rentalRepository.findAll();
-        return StreamSupport.stream(rentalIterable.spliterator(),false).collect(Collectors.toList());
+//Obtenir liste de tous les rentals en DTO
+    public List<RentalDTO>getAllRentals(){
+        return StreamSupport.stream(rentalRepository.findAll().spliterator(),false).map(this::entityToDto).collect(Collectors.toList());
     }
 
-//Obtenir un rental par son id
-public Optional<Rental> getRentalById(Long id){
-        return rentalRepository.findById(id);
+//Obtenir un rental par son id et le convertir en DTO
+public Optional<RentalDTO> getRentalById(Long id){
+        return rentalRepository.findById(id).map(this::entityToDto);
 }
 
-// Création d'un rental
-public void createRental(Rental rental) {
+// Création d'un rental à partir du DTO
+public void createRental(RentalDTO rentalDTO) {
+        Rental rental = dtoToEntity(rentalDTO);
     rental.setCreatedAt(LocalDateTime.now());  // Initialiser createdAt
     rental.setUpdatedAt(LocalDateTime.now());  // Initialiser updatedAt
     rentalRepository.save(rental);
@@ -37,19 +37,52 @@ public void createRental(Rental rental) {
 
 
     // Mettre à jour une location existante
-    public Optional<Rental> updateRental(Long id, Rental rentalDetails) {
+    public Optional<RentalDTO> updateRental(Long id, RentalDTO rentalDTO) {
         return rentalRepository.findById(id).map(rental -> {
-            rental.setName(rentalDetails.getName());
-            rental.setSurface(rentalDetails.getSurface());
-            rental.setPrice(rentalDetails.getPrice());
-            rental.setDescription(rentalDetails.getDescription());
-            rental.setPicture(rentalDetails.getPicture());
-            rental.setUpdatedAt(rentalDetails.getUpdatedAt());
-            return rentalRepository.save(rental);
+            rental.setName(rentalDTO.getName());
+            rental.setSurface(rentalDTO.getSurface());
+            rental.setPrice(rentalDTO.getPrice());
+            rental.setDescription(rentalDTO.getDescription());
+            rental.setPicture(rentalDTO.getPicture());
+            rental.setUpdatedAt(rentalDTO.getUpdatedAt());
+            return entityToDto(rentalRepository.save(rental));
         });
     }
 
 //Supprimer un rental
 public void deleteRental(Long id){
     rentalRepository.deleteById(id);}
+
+    // Conversion d'une entité Rental en DTO
+    private RentalDTO entityToDto(Rental rental) {
+        RentalDTO rentalDTO = new RentalDTO();
+        rentalDTO.setId(rental.getId());
+        rentalDTO.setName(rental.getName());
+        rentalDTO.setSurface(rental.getSurface());
+        rentalDTO.setPrice(rental.getPrice());
+        rentalDTO.setPicture(rental.getPicture());
+        rentalDTO.setDescription(rental.getDescription());
+        rentalDTO.setOwnerId(rental.getOwnerId());
+        rentalDTO.setCreatedAt(rental.getCreatedAt());
+        rentalDTO.setUpdatedAt(rental.getUpdatedAt());
+        return rentalDTO;
+    }
+
+    // Conversion d'un DTO en entité Rental
+    private Rental dtoToEntity(RentalDTO rentalDTO) {
+        Rental rental = new Rental();
+        rental.setId(rentalDTO.getId());
+        rental.setName(rentalDTO.getName());
+        rental.setSurface(rentalDTO.getSurface());
+        rental.setPrice(rentalDTO.getPrice());
+        rental.setPicture(rentalDTO.getPicture());
+        rental.setDescription(rentalDTO.getDescription());
+        rental.setOwnerId(rentalDTO.getOwnerId());
+        rental.setCreatedAt(rentalDTO.getCreatedAt());
+        rental.setUpdatedAt(rentalDTO.getUpdatedAt());
+        return rental;
+    }
 }
+
+
+

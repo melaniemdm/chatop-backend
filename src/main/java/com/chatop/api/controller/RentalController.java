@@ -1,6 +1,6 @@
 package com.chatop.api.controller;
 
-import com.chatop.api.model.Rental;
+import com.chatop.api.dto.RentalDTO;
 import com.chatop.api.service.RentalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,26 +16,26 @@ public class RentalController {
     private RentalService rentalService;
 
 @GetMapping
-    public List<Rental> getAllRentals(){
+    public List<RentalDTO> getAllRentals(){
     return rentalService.getAllRentals();
 }
 
 @GetMapping("/{id}")
-public ResponseEntity<Rental> getRentalById(@PathVariable Long id){
-    Optional<Rental> rental = rentalService.getRentalById(id);
+public ResponseEntity<RentalDTO> getRentalById(@PathVariable Long id){
+    Optional<RentalDTO> rental = rentalService.getRentalById(id);
     return rental.map(ResponseEntity::ok).orElse( ResponseEntity.notFound().build());
 }
 
 @PostMapping
-public ResponseEntity<String> createRental(@RequestBody Rental rental) {
-    rentalService.createRental(rental);
+public ResponseEntity<String> createRental(@RequestBody RentalDTO rentalDTO) {
+    rentalService.createRental(rentalDTO);
     return ResponseEntity.ok("Rental created!");
 }
 
 
 @PutMapping("/{id}")
-    public ResponseEntity<String>updateRental(@PathVariable Long id, @RequestBody Rental rentalDetails){
-    Optional<Rental> updatedRental = rentalService.updateRental(id, rentalDetails);
+    public ResponseEntity<String>updateRental(@PathVariable Long id, @RequestBody RentalDTO rentalDTO){
+    Optional<RentalDTO> updatedRental = rentalService.updateRental(id, rentalDTO);
     if(updatedRental.isPresent()){
         return ResponseEntity.ok("rental update");
     }else {
