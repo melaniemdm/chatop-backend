@@ -45,7 +45,7 @@ public Optional<RentalDTO> getRentalById(Long id){
         if (file != null && !file.isEmpty()) {
             System.out.println("Nom du fichier reçu: " + file.getOriginalFilename());
             String fileName = saveFile(file);
-            rental.setPicture("/upload/pictures/" + fileName);
+            rental.setPicture("http://localhost:3001/api/upload/pictures/" + fileName);
             System.out.println("Fichier sauvegardé sous: /upload/pictures/" + fileName);
         } else {
             System.out.println("Aucun fichier reçu ou le fichier est vide.");
