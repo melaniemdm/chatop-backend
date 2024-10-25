@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+
 @Data
 @Service
 public class UserService {
+
     @Autowired
     private UserRepository userRepository;
 
@@ -41,8 +43,17 @@ public class UserService {
     // Méthode pour trouver un utilisateur par son email
     public Optional<UserDTO> getUserByLogin(String login) {
         Optional<User> user = userRepository.findByEmail(login);
+
+        // Affiche ce qui est trouvé ou non
+        if (user.isPresent()) {
+            System.out.println("Utilisateur trouvé : " + user.get());
+        } else {
+            System.out.println("Aucun utilisateur trouvé pour l'email : " + login);
+        }
+
         return user.map(this::entityToDto); // "login" correspond à l'email
     }
+
     // Méthode pour convertir un User en UserDTO
     public UserDTO entityToDto(User user) {
         UserDTO userDTO = new UserDTO();
@@ -51,6 +62,8 @@ public class UserService {
         userDTO.setEmail(user.getEmail());
         userDTO.setCreatedAt(user.getCreatedAt());
         userDTO.setUpdatedAt(user.getUpdatedAt());
+        userDTO.setPassword(user.getPassword());
+
         return userDTO;
     }
 

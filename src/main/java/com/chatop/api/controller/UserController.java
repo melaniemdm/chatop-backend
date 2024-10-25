@@ -6,7 +6,6 @@ import com.chatop.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +20,6 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
-        // Utilisation de "login" comme alias pour "email"
         String login = loginRequest.get("login");
         String password = loginRequest.get("password");
 
@@ -29,11 +27,12 @@ public class UserController {
         Optional<UserDTO> foundUser = userService.getUserByLogin(login);
 
         if (foundUser.isPresent()) {
+            System.out.println("User found: " + foundUser.get());
             // Vérification du mot de passe
-            if (foundUser.equals("password_check")) {
-                // Création objet de réponse JSON directement
+            if (password.equals(foundUser.get().getPassword())) { // Comparez le mot de passe ici
+                // Génération du token ou réponse de succès
                 Map<String, String> response = new HashMap<>();
-                response.put("token", "jwt");
+                response.put("token", "jwt_token_placeholder"); // Remplacer par un vrai JWT token si nécessaire
                 return ResponseEntity.ok(response);
             } else {
                 // Mauvais mot de passe
@@ -44,6 +43,7 @@ public class UserController {
             return ResponseEntity.status(404).body("User not found");
         }
     }
+
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
