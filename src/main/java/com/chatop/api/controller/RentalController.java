@@ -14,6 +14,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/rentals")
 public class RentalController {
+
 @Autowired
     private RentalService rentalService;
 
@@ -22,11 +23,13 @@ public class RentalController {
     return rentalService.getAllRentals();
 }
 
-@GetMapping("/{id}")
-public ResponseEntity<RentalDTO> getRentalById(@PathVariable Long id){
-    Optional<RentalDTO> rental = rentalService.getRentalById(id);
-    return rental.map(ResponseEntity::ok).orElse( ResponseEntity.notFound().build());
-}
+    @GetMapping("/{id}")
+    public ResponseEntity<RentalDTO> getRentalById(@PathVariable Long id) {
+        return rentalService.getRentalById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 
     @PostMapping
     public ResponseEntity<String> createRental(
@@ -54,17 +57,15 @@ public ResponseEntity<RentalDTO> getRentalById(@PathVariable Long id){
 
 
 @PutMapping("/{id}")
-    public ResponseEntity<String>updateRental(@PathVariable Long id, @RequestBody RentalDTO rentalDTO){
-    Optional<RentalDTO> updatedRental = rentalService.updateRental(id, rentalDTO);
-    if(updatedRental.isPresent()){
-        return ResponseEntity.ok("rental update");
-    }else {
-        return ResponseEntity.notFound().build();
-    }
+public ResponseEntity<String> updateRental(@PathVariable Long id, @RequestBody RentalDTO rentalDTO) {
+    return rentalService.updateRental(id, rentalDTO)
+            .map(rental -> ResponseEntity.ok("Rental updated"))
+            .orElse(ResponseEntity.notFound().build());
 }
 
 
-@DeleteMapping("/{id}")
+
+    @DeleteMapping("/{id}")
 public ResponseEntity<String> deleteRental(@PathVariable Long id){
     rentalService.deleteRental(id);
     return ResponseEntity.ok("rental deleted");

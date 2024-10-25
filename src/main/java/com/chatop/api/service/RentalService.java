@@ -6,7 +6,6 @@ import com.chatop.api.repository.RentalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +28,9 @@ public class RentalService {
 
 //Obtenir liste de tous les rentals en DTO
     public List<RentalDTO>getAllRentals(){
-        return StreamSupport.stream(rentalRepository.findAll().spliterator(),false).map(this::entityToDto).collect(Collectors.toList());
+        return StreamSupport.stream(rentalRepository.findAll().spliterator(),false)
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
     }
 
 //Obtenir un rental par son id et le convertir en DTO
@@ -37,22 +38,23 @@ public Optional<RentalDTO> getRentalById(Long id){
         return rentalRepository.findById(id).map(this::entityToDto);
 }
 
-    // Créer un rental à partir du DTO et du fichier image
     public void createRental(RentalDTO rentalDTO, MultipartFile file) throws IOException {
         Rental rental = dtoToEntity(rentalDTO);
 
-        // Sauvegarde le fichier image si fourni
+        // Vérifie et sauvegarde l'image si elle est présente
         if (file != null && !file.isEmpty()) {
-            System.out.println("Nom du fichier reçu: " + file.getOriginalFilename());
             String fileName = saveFile(file);
             rental.setPicture("http://localhost:3001/api/upload/pictures/" + fileName);
-            System.out.println("Fichier sauvegardé sous: /upload/pictures/" + fileName);
+            System.out.println("Fichier reçu et sauvegardé: " + fileName);
         } else {
             System.out.println("Aucun fichier reçu ou le fichier est vide.");
         }
 
+        // Définir les dates de création et mise à jour
         rental.setCreatedAt(LocalDateTime.now());
         rental.setUpdatedAt(LocalDateTime.now());
+
+        // Sauvegarde le rental dans le repository
         rentalRepository.save(rental);
     }
 
@@ -105,22 +107,20 @@ public void deleteRental(Long id){
     }
 
     public String saveFile(MultipartFile file) throws IOException {
-        // Créer le répertoire de stockage s'il n'existe pas
+        // Vérifie si le répertoire existe, sinon le crée
         Path uploadPath = Paths.get(uploadDirectory);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
+        Files.createDirectories(uploadPath);
 
+        // Définit le chemin et enregistre le fichier
         String fileName = file.getOriginalFilename();
         Path filePath = uploadPath.resolve(fileName);
-
-        // Sauvegarder le fichier sur le disque
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        System.out.println("Fichier sauvegardé dans: " + filePath.toString());
+        System.out.println("Fichier sauvegardé à: " + filePath);
 
-        return fileName;  // Retourner le nom du fichier pour l'enregistrement
+        return fileName; // Retourne le nom du fichier
     }
+
 }
 
 
