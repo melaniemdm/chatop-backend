@@ -13,9 +13,9 @@ public class MessageService {
     private MessageRepository messageRepository;
 
     public void createMessage(MessageDTO messageDTO) {
-        Message message = dtoToEntity(messageDTO);
-        messageRepository.save(message);
+        messageRepository.save(dtoToEntity(messageDTO));
     }
+
     //Convertit une entité en DTO
     public MessageDTO entityToDto(Message message) {
         MessageDTO messageDTO = new MessageDTO();
