@@ -23,26 +23,21 @@ public class UserController {
         String login = loginRequest.get("login");
         String password = loginRequest.get("password");
 
-        // Recherche de l'utilisateur par email
         Optional<UserDTO> foundUser = userService.getUserByLogin(login);
 
-        if (foundUser.isPresent()) {
-            System.out.println("User found: " + foundUser.get());
-            // Vérification du mot de passe
-            if (password.equals(foundUser.get().getPassword())) { // Comparez le mot de passe ici
-                // Génération du token ou réponse de succès
-                Map<String, String> response = new HashMap<>();
-                response.put("token", "jwt_token_placeholder"); // Remplacer par un vrai JWT token si nécessaire
-                return ResponseEntity.ok(response);
-            } else {
-                // Mauvais mot de passe
-                return ResponseEntity.status(401).body("Invalid credentials");
-            }
-        } else {
-            // Utilisateur non trouvé
+        if (!foundUser.isPresent()) {
             return ResponseEntity.status(404).body("User not found");
         }
+
+        UserDTO user = foundUser.get();
+        if (!password.equals(user.getPassword())) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+
+        String tokenResponse = "{ \"token\": \"jwt_token_placeholder\" }"; // Remplacez par un vrai JWT si nécessaire
+        return ResponseEntity.ok().body(tokenResponse);
     }
+
 
 
     @PostMapping("/register")
@@ -58,10 +53,16 @@ public class UserController {
     }
 
     @GetMapping("/me")
-   public ResponseEntity<UserDTO> getMe(){
+    public ResponseEntity<UserDTO> getMe() {
         Long id = 1L;
         Optional<UserDTO> userDTO = userService.getUser(id);
-        return userDTO.map(ResponseEntity::ok).orElseGet(()-> ResponseEntity.status(404).build());
+
+        if (userDTO.isPresent()) {
+            return ResponseEntity.ok(userDTO.get());
+        } else {
+            return ResponseEntity.status(404).build();
+        }
     }
+
 
 }

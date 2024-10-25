@@ -17,11 +17,11 @@ public class MessageController {
 
     @PostMapping
     public ResponseEntity<Map<String, String>> createMessage(@RequestBody MessageDTO messageDTO) {
-        if (messageDTO.getMessage().isBlank()) {
+        if (messageDTO.getMessage().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Message content cannot be empty"));
         }
 // Creation of the message via service
         messageService.createMessage(messageDTO);
-        return ResponseEntity.ok(Map.of("message", "Message created successfully"));
+        return ResponseEntity.ok().body(Map.of("message", "Message created successfully"));
     }
 }

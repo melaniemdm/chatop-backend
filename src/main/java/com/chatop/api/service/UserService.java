@@ -51,7 +51,8 @@ public class UserService {
             System.out.println("Aucun utilisateur trouvé pour l'email : " + login);
         }
 
-        return user.map(this::entityToDto); // "login" correspond à l'email
+      return user.map(this::entityToDto);
+
     }
 
     // Méthode pour convertir un User en UserDTO

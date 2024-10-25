@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -27,18 +28,32 @@ public class RentalService {
     private RentalRepository rentalRepository;
 
 //Obtenir liste de tous les rentals en DTO
-    public List<RentalDTO>getAllRentals(){
-        return StreamSupport.stream(rentalRepository.findAll().spliterator(),false)
-                .map(this::entityToDto)
-                .collect(Collectors.toList());
+public List<RentalDTO> getAllRentals() {
+    List<Rental> rentals = (List<Rental>) rentalRepository.findAll();
+    List<RentalDTO> rentalDTOs = new ArrayList<>();
+
+    for (Rental rental : rentals) {
+        rentalDTOs.add(entityToDto(rental));
     }
 
-//Obtenir un rental par son id et le convertir en DTO
-public Optional<RentalDTO> getRentalById(Long id){
-        return rentalRepository.findById(id).map(this::entityToDto);
+    return rentalDTOs;
 }
 
-    public void createRental(RentalDTO rentalDTO, MultipartFile file) throws IOException {
+
+    //Obtenir un rental par son id et le convertir en DTO
+    public Optional<RentalDTO> getRentalById(Long id) {
+        Optional<Rental> rental = rentalRepository.findById(id);
+
+        if (rental.isPresent()) {
+            RentalDTO rentalDTO = entityToDto(rental.get());
+            return Optional.of(rentalDTO);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+
+public void createRental(RentalDTO rentalDTO, MultipartFile file) throws IOException {
         Rental rental = dtoToEntity(rentalDTO);
 
         // Vérifie et sauvegarde l'image si elle est présente
@@ -61,18 +76,26 @@ public Optional<RentalDTO> getRentalById(Long id){
 
     // Mettre à jour une location existante
     public Optional<RentalDTO> updateRental(Long id, RentalDTO rentalDTO) {
-        return rentalRepository.findById(id).map(rental -> {
+        Optional<Rental> rentalOptional = rentalRepository.findById(id);
+
+        if (rentalOptional.isPresent()) {
+            Rental rental = rentalOptional.get();
             rental.setName(rentalDTO.getName());
             rental.setSurface(rentalDTO.getSurface());
             rental.setPrice(rentalDTO.getPrice());
             rental.setDescription(rentalDTO.getDescription());
             rental.setPicture(rentalDTO.getPicture());
             rental.setUpdatedAt(rentalDTO.getUpdatedAt());
-            return entityToDto(rentalRepository.save(rental));
-        });
+
+            Rental updatedRental = rentalRepository.save(rental);
+            return Optional.of(entityToDto(updatedRental));
+        } else {
+            return Optional.empty();
+        }
     }
 
-//Supprimer un rental
+
+    //Supprimer un rental
 public void deleteRental(Long id){
     rentalRepository.deleteById(id);}
 
@@ -107,7 +130,7 @@ public void deleteRental(Long id){
     }
 
     public String saveFile(MultipartFile file) throws IOException {
-        // Vérifie si le répertoire existe, sinon le crée
+
         Path uploadPath = Paths.get(uploadDirectory);
         Files.createDirectories(uploadPath);
 

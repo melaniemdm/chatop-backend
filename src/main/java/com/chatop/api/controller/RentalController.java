@@ -7,9 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/rentals")
@@ -25,10 +25,15 @@ public class RentalController {
 
     @GetMapping("/{id}")
     public ResponseEntity<RentalDTO> getRentalById(@PathVariable Long id) {
-        return rentalService.getRentalById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<RentalDTO> rental = rentalService.getRentalById(id);
+
+        if (rental.isPresent()) {
+            return ResponseEntity.ok(rental.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
+
 
 
     @PostMapping
@@ -50,7 +55,7 @@ public class RentalController {
         try {
             rentalService.createRental(rentalDTO, file);
             return ResponseEntity.ok("Rental created!");
-        } catch (Exception e) {
+        } catch (Exception exception) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create rental");
         }
     }
@@ -58,10 +63,15 @@ public class RentalController {
 
 @PutMapping("/{id}")
 public ResponseEntity<String> updateRental(@PathVariable Long id, @RequestBody RentalDTO rentalDTO) {
-    return rentalService.updateRental(id, rentalDTO)
-            .map(rental -> ResponseEntity.ok("Rental updated"))
-            .orElse(ResponseEntity.notFound().build());
+    Optional<RentalDTO> updatedRental = rentalService.updateRental(id, rentalDTO);
+
+    if (updatedRental.isPresent()) {
+        return ResponseEntity.ok("Rental updated");
+    } else {
+        return ResponseEntity.notFound().build();
+    }
 }
+
 
 
 
