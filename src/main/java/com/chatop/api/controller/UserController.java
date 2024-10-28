@@ -1,12 +1,11 @@
 package com.chatop.api.controller;
 
 import com.chatop.api.dto.UserDTO;
-import com.chatop.api.model.User;
 import com.chatop.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,6 +16,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
@@ -30,11 +32,12 @@ public class UserController {
         }
 
         UserDTO user = foundUser.get();
-        if (!password.equals(user.getPassword())) {
+
+       if (!passwordEncoder.matches(password, user.getPassword())) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        String tokenResponse = "{ \"token\": \"jwt_token_placeholder\" }"; // Remplacez par un vrai JWT si nécessaire
+        String tokenResponse = "{ \"token\": \"jwt_token_placeholder\" }";
         return ResponseEntity.ok().body(tokenResponse);
     }
 
