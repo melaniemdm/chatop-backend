@@ -14,10 +14,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Désactiver CSRF pour les tests d'API (à réactiver si nécessaire)
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/login", "auth/me", "/rentals","/rentals/{id}", "/messages").permitAll()
-                        .requestMatchers("/upload/pictures/**").permitAll() // Autoriser l'accès aux fichiers dans /upload/pictures/
+                        .requestMatchers(
+                                "/auth/register",
+                                "/auth/login",
+                                "/auth/me",
+                                "/rentals",
+                                "/rentals/{id}",
+                                "/messages",
+                                "/upload/pictures/**"
+                        ).permitAll() // Autoriser l'accès sans authentification aux endpoints publics
                         .anyRequest().authenticated() // Exiger une authentification pour toutes les autres requêtes
                 );
 
