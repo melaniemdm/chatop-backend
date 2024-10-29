@@ -60,7 +60,7 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserDTO> getMe() {
-        Long id = 1L;
+        Long id = 18L;
         Optional<UserDTO> userDTO = userService.getUser(id);
 
         if (userDTO.isPresent()) {
