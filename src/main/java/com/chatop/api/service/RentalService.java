@@ -15,8 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
-import java.util.stream.Collectors;
+
 
 
 @Service
@@ -134,7 +133,7 @@ public void deleteRental(Long id){
         Path uploadPath = Paths.get(uploadDirectory);
         Files.createDirectories(uploadPath);
 
-        // Définit le chemin et enregistre le fichier
+        // Sets the path and saves the file
         String fileName = file.getOriginalFilename();
         Path filePath = uploadPath.resolve(fileName);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);

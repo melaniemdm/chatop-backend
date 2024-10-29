@@ -27,25 +27,28 @@ public class UserController {
 
         Optional<UserDTO> foundUser = userService.getUserByLogin(login);
 
-        if (!foundUser.isPresent()) {
+        if (foundUser.isEmpty()) {
             return ResponseEntity.status(404).body("User not found");
         }
 
         UserDTO user = foundUser.get();
 
-       if (!passwordEncoder.matches(password, user.getPassword())) {
+// Verifying password using BCryptPasswordEncoder
+        boolean isPasswordValid = passwordEncoder.matches(password, user.getPassword());
+        if (!isPasswordValid) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
+// Generating a response with the token (placeholder)
         String tokenResponse = "{ \"token\": \"jwt_token_placeholder\" }";
-        return ResponseEntity.ok().body(tokenResponse);
+        return ResponseEntity.ok(tokenResponse);
     }
 
 
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
-        // Validez que le password est présent
+           //Validate that the password is present
         if (userDTO.getPassword() == null || userDTO.getPassword().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Password is required");
         }
