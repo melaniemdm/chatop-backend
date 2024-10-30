@@ -3,12 +3,15 @@ package com.chatop.api.controller;
 import com.chatop.api.dto.UserDTO;
 import com.chatop.api.service.JwtService;
 import com.chatop.api.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -73,15 +76,43 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> getMe() {
-        Long id = 18L;
-        Optional<UserDTO> userDTO = userService.getUser(id);
+    public ResponseEntity<Map<String, Object>> getMe(HttpServletRequest request) {
+        // Récupération du token depuis l'en-tête Authorization
+        String authHeader = request.getHeader("Authorization");
+        String token = null;
+        System.out.println("BEARER"+ authHeader);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7); // Supprime le préfixe "Bearer "
 
-        if (userDTO.isPresent()) {
-            return ResponseEntity.ok(userDTO.get());
         } else {
-            return ResponseEntity.status(404).build();
+            return ResponseEntity.status(401).body(Map.of("error", "Token not provided"));
+
         }
+
+        // Validation du token et extraction de l'email (ou autre information utilisateur)
+        String username;
+        try {
+            username = jwtService.getUsernameFromToken(token); // Méthode pour extraire le sujet du token
+            System.out.println("usernameController"+ username);
+            if (username == null || !jwtService.validateToken(token, username)) {
+                return ResponseEntity.status(401).body(Map.of("error", "Invalid or expired token"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Token validation failed"));
+        }
+
+        // Récupérer les informations de l'utilisateur à partir du service UserService
+        Optional<UserDTO> userDTO = userService.getUserByLogin(username);
+        if (userDTO.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+
+        // Construire la réponse avec les informations utilisateur et le token
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", userDTO.get());
+        response.put("token", token);
+
+        return ResponseEntity.ok(response);
     }
 
 

@@ -17,6 +17,16 @@ public class JwtService {
 
     private static final String HEADER = Base64.getUrlEncoder().encodeToString("{\"alg\":\"HS256\",\"typ\":\"JWT\"}".getBytes());
 
+    public String getUsernameFromToken(String token) {
+        try {
+            String[] parts = token.split("\\.");
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+            Map<String, Object> payloadMap = parsePayload(payload);
+            return (String) payloadMap.get("sub");
+        } catch (Exception e) {
+            return null;
+        }
+    }
     public String generateToken(String username) {
         long expirationTimeMillis = 1000 * 60 * 60 * 10; // 10 heures de validité
         long expirationDate = System.currentTimeMillis() + expirationTimeMillis;
@@ -59,15 +69,23 @@ public class JwtService {
 
             // Vérification de la signature
             String expectedSignature = sign(headerPayload);
+
             if (!expectedSignature.equals(signature)) return false;
 
             // Décodage et vérification du payload
             String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
+
             Map<String, Object> payload = parsePayload(payloadJson);
 
             String tokenUsername = (String) payload.get("sub");
-            Long expiration = (Long) payload.get("exp");
-            return username.equals(tokenUsername) && expiration >= System.currentTimeMillis();
+
+            String expiration = (String) payload.get("exp");
+
+            boolean testName = username.equals(tokenUsername);
+
+            boolean testExpirationDate = Long.valueOf(expiration) >= System.currentTimeMillis();
+
+            return testExpirationDate && testName;
         } catch (Exception e) {
             return false;
         }
