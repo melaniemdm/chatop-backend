@@ -17,31 +17,45 @@ public class JwtService {
 
     private static final String HEADER = Base64.getUrlEncoder().encodeToString("{\"alg\":\"HS256\",\"typ\":\"JWT\"}".getBytes());
 
+    // Extrait le nom d'utilisateur (username) du token en décodant la partie payload
     public String getUsernameFromToken(String token) {
         try {
-            String[] parts = token.split("\\.");
-            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
-            Map<String, Object> payloadMap = parsePayload(payload);
-            return (String) payloadMap.get("sub");
+            String payload = new String(Base64.getUrlDecoder().decode(token.split("\\.")[1]));
+            return (String) parsePayload(payload).get("sub");
         } catch (Exception e) {
             return null;
         }
     }
-    public String generateToken(String username) {
-        long expirationTimeMillis = 1000 * 60 * 60 * 10; // 10 heures de validité
+    public String getIDFromToken(String token) {
+        try {
+            // Décoder la partie payload du token
+            String payload = new String(Base64.getUrlDecoder().decode(token.split("\\.")[1]));
+
+            // Extraire l'ID à partir du payload
+            return (String) parsePayload(payload).get("id");
+        } catch (Exception e) {
+            return null; // Retourner null si une erreur survient
+        }
+    }
+
+    // Génère un token JWT pour un utilisateur donné
+    public String generateToken(String username, Long userId) {
+        long expirationTimeMillis = 1000 * 60 * 60 * 10; // 10 hours of validity
         long expirationDate = System.currentTimeMillis() + expirationTimeMillis;
 
-        // Création de la charge utile (payload)
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("sub", username);
-        payload.put("exp", expirationDate);
+        Map<String, Object> payload = new HashMap<String, Object>() {{
+            put("sub", username);
+            put("exp", expirationDate);
+            put("id", userId);
+        }};
 
+        // Encodage du payload en Base64
         String payloadBase64 = Base64.getUrlEncoder().encodeToString(payload.toString().getBytes());
 
-        // Concaténation du header et du payload
+        // Concatenation of header and payload
         String headerPayload = HEADER + "." + payloadBase64;
 
-        // Génération de la signature
+        // Signature generation
         String signature = sign(headerPayload);
 
         // Construction du JWT final
@@ -50,47 +64,34 @@ public class JwtService {
 
     private String sign(String data) {
         try {
-            Mac hmacSha256 = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            hmacSha256.init(secretKeySpec);
-            return Base64.getUrlEncoder().encodeToString(hmacSha256.doFinal(data.getBytes(StandardCharsets.UTF_8)));
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de la signature du token JWT", e);
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            return Base64.getUrlEncoder().encodeToString(mac.doFinal(data.getBytes(StandardCharsets.UTF_8)));
+        } catch (Exception exception) {
+            throw new RuntimeException("Erreur lors de la signature du token JWT", exception);
         }
     }
 
+    // Valide le token en vérifiant sa signature et son expiration
     public boolean validateToken(String token, String username) {
         try {
             String[] parts = token.split("\\.");
             if (parts.length != 3) return false;
 
-            String headerPayload = parts[0] + "." + parts[1];
-            String signature = parts[2];
+            // Signature Verification
+            String expectedSignature = sign(parts[0] + "." + parts[1]);
+            if (!expectedSignature.equals(parts[2])) return false;
 
-            // Vérification de la signature
-            String expectedSignature = sign(headerPayload);
-
-            if (!expectedSignature.equals(signature)) return false;
-
-            // Décodage et vérification du payload
-            String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
-
-            Map<String, Object> payload = parsePayload(payloadJson);
-
-            String tokenUsername = (String) payload.get("sub");
-
-            String expiration = (String) payload.get("exp");
-
-            boolean testName = username.equals(tokenUsername);
-
-            boolean testExpirationDate = Long.valueOf(expiration) >= System.currentTimeMillis();
-
-            return testExpirationDate && testName;
+            // Payload decoding and verification
+            Map<String, Object> payload = parsePayload(new String(Base64.getUrlDecoder().decode(parts[1])));
+            return username.equals(payload.get("sub")) &&
+                    Long.parseLong((String) payload.get("exp")) >= System.currentTimeMillis();
         } catch (Exception e) {
             return false;
         }
     }
 
+    // Parse le payload du JWT pour obtenir un map clé/valeur des données
     private Map<String, Object> parsePayload(String payloadJson) {
         Map<String, Object> payload = new HashMap<>();
         payloadJson = payloadJson.replace("{", "").replace("}", "");

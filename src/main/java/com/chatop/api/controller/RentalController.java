@@ -1,13 +1,18 @@
 package com.chatop.api.controller;
 
 import com.chatop.api.dto.RentalDTO;
+import com.chatop.api.service.JwtService;
 import com.chatop.api.service.RentalService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -17,10 +22,15 @@ public class RentalController {
 
 @Autowired
     private RentalService rentalService;
+    @Autowired
+    private  JwtService jwtService;
 
 @GetMapping
-    public List<RentalDTO> getAllRentals(){
-    return rentalService.getAllRentals();
+public Map<String, List<RentalDTO>> getAllRentals() {
+    List<RentalDTO> rentalDTOs = rentalService.getAllRentals();
+
+    // Encapsule la liste dans un Map avec la clé "rentals"
+    return Map.of("rentals", rentalDTOs);
 }
 
     @GetMapping("/{id}")
@@ -37,14 +47,42 @@ public class RentalController {
 
 
     @PostMapping
-    public ResponseEntity<String> createRental(
+    public ResponseEntity<Map<String, Object>> createRental(
             @RequestParam("name") String name,
             @RequestParam("surface") Double surface,
             @RequestParam("price") Double price,
             @RequestParam("description") String description,
-            @RequestParam("ownerId") Integer ownerId,
-            @RequestParam("picture") MultipartFile file) {
+            @RequestParam("picture") MultipartFile file,
+            HttpServletRequest request) {
 
+        String authHeader = request.getHeader("Authorization");
+        String token = null;
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7); // Supprime le préfixe "Bearer "
+        }
+
+        // Utiliser jwtService pour extraire l'ID du propriétaire
+        String ownerIdStr = null;
+        if (token != null) {
+            ownerIdStr = jwtService.getIDFromToken(token); // Utilise getIDFromToken pour obtenir l'ID sous forme de chaîne
+        }
+
+        // Vérifiez que l'ID n'est pas null avant la conversion
+        if (ownerIdStr == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Invalid or missing token."));
+        }
+
+        Integer ownerId;
+        try {
+            ownerId = Integer.parseInt(ownerIdStr); // Convertir en Integer si ownerIdStr n'est pas null
+        } catch (NumberFormatException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Invalid ID format in token."));
+        }
+
+        // Créer le DTO de location
         RentalDTO rentalDTO = new RentalDTO();
         rentalDTO.setName(name);
         rentalDTO.setSurface(surface);
@@ -54,14 +92,21 @@ public class RentalController {
 
         try {
             rentalService.createRental(rentalDTO, file);
-            return ResponseEntity.ok("Rental created!");
+
+            // Créer un objet Map pour la réponse
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Rental created successfully!");
+
+
+            return ResponseEntity.ok(response);
         } catch (Exception exception) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create rental");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Failed to create rental."));
         }
     }
 
 
-@PutMapping("/{id}")
+    @PutMapping("/{id}")
 public ResponseEntity<String> updateRental(@PathVariable Long id, @RequestBody RentalDTO rentalDTO) {
     Optional<RentalDTO> updatedRental = rentalService.updateRental(id, rentalDTO);
 

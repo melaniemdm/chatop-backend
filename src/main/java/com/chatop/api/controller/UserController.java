@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +30,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
-        String login = loginRequest.get("login");
+        String login = loginRequest.get("email");
         String password = loginRequest.get("password");
 
         Optional<UserDTO> foundUser = userService.getUserByLogin(login);
@@ -48,13 +47,12 @@ public class UserController {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        // Génération du token JWT pour l'utilisateur authentifié en utilisant l'email comme sujet
-        String token = jwtService.generateToken(user.getEmail());
+        // Generation of the JWT token for the authenticated user using the email as subject
+        String token = jwtService.generateToken(user.getEmail(), user.getId());
 
-      // Affiche le token généré dans les logs
-        logger.info("Token JWT généré : {}", token);
+        System.out.println("Token JWT généré : {}"+ token);
 
-        // Réponse avec le token
+        // Response with token
         return ResponseEntity.ok("{ \"token\": \"" + token + "\" }");
     }
 
@@ -66,11 +64,11 @@ public class UserController {
         if (userDTO.getPassword() == null || userDTO.getPassword().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Password is required");
         }
-        // Enregistrement de l'utilisateur
+        // User registration
         UserDTO savedUser = userService.saveUser(userDTO);
 
-        // Génération d'un token JWT pour l'utilisateur nouvellement inscrit en utilisant l'email comme sujet
-        String token = jwtService.generateToken(savedUser.getEmail());
+        // Generation of the JWT token for the authenticated user using the email as subject
+        String token = jwtService.generateToken(savedUser.getEmail(), savedUser.getId());
 
         return ResponseEntity.ok().body("{ \"token\": \"" + token + "\" }");
     }
@@ -80,9 +78,11 @@ public class UserController {
         // Récupération du token depuis l'en-tête Authorization
         String authHeader = request.getHeader("Authorization");
         String token = null;
+
         System.out.println("BEARER"+ authHeader);
+
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7); // Supprime le préfixe "Bearer "
+            token = authHeader.substring(7); // Remove the "Bearer" prefix
 
         } else {
             return ResponseEntity.status(401).body(Map.of("error", "Token not provided"));
@@ -92,24 +92,30 @@ public class UserController {
         // Validation du token et extraction de l'email (ou autre information utilisateur)
         String username;
         try {
-            username = jwtService.getUsernameFromToken(token); // Méthode pour extraire le sujet du token
+            username = jwtService.getUsernameFromToken(token);
+
             System.out.println("usernameController"+ username);
+
             if (username == null || !jwtService.validateToken(token, username)) {
                 return ResponseEntity.status(401).body(Map.of("error", "Invalid or expired token"));
             }
-        } catch (Exception e) {
+        } catch (Exception exception) {
             return ResponseEntity.status(401).body(Map.of("error", "Token validation failed"));
         }
 
-        // Récupérer les informations de l'utilisateur à partir du service UserService
+        // Retrieve user information from UserService
         Optional<UserDTO> userDTO = userService.getUserByLogin(username);
         if (userDTO.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("error", "User not found"));
         }
 
-        // Construire la réponse avec les informations utilisateur et le token
+        // Build the response with user information and token
         Map<String, Object> response = new HashMap<>();
-        response.put("user", userDTO.get());
+        response.put("id", userDTO.get().getId());
+        response.put("name", userDTO.get().getName());
+        response.put("email", userDTO.get().getEmail());
+        response.put("created_at", userDTO.get().getCreatedAt());
+        response.put("updated_at", userDTO.get().getUpdatedAt());
         response.put("token", token);
 
         return ResponseEntity.ok(response);
