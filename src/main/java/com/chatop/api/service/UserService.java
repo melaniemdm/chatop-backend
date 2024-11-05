@@ -44,11 +44,11 @@ public class UserService {
     }
 
 
-    // Méthode pour trouver un utilisateur par son email
+    // Method to find a user by their email
     public Optional<UserDTO> getUserByLogin(String login) {
         Optional<User> user = userRepository.findByEmail(login);
 
-        // Affiche ce qui est trouvé ou non
+        // Shows what is found or not
         if (user.isPresent()) {
             System.out.println("Utilisateur trouvé : " + user.get());
         } else {

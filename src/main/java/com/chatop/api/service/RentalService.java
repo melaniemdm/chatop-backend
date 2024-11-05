@@ -39,6 +39,7 @@ public List<RentalDTO> getAllRentals() {
 }
 
 
+
     //Obtenir un rental par son id et le convertir en DTO
     public Optional<RentalDTO> getRentalById(Long id) {
         Optional<Rental> rental = rentalRepository.findById(id);
