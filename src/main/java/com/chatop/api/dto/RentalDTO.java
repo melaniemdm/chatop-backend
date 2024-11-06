@@ -1,5 +1,7 @@
 package com.chatop.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.LocalDateTime;
 
 public class RentalDTO {
@@ -62,12 +64,13 @@ public class RentalDTO {
         this.description = description;
     }
 
+    @JsonProperty("owner_id")
     public Integer getOwnerId() {
         return ownerId;
     }
 
     public void setOwnerId(Integer ownerId) {
-        this.ownerId = ownerId;
+        this.ownerId= ownerId;
     }
 
     public LocalDateTime getCreatedAt() {
