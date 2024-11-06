@@ -84,8 +84,7 @@ public void createRental(RentalDTO rentalDTO, MultipartFile file) throws IOExcep
             rental.setSurface(rentalDTO.getSurface());
             rental.setPrice(rentalDTO.getPrice());
             rental.setDescription(rentalDTO.getDescription());
-            rental.setPicture(rentalDTO.getPicture());
-            rental.setUpdatedAt(rentalDTO.getUpdatedAt());
+
 
             Rental updatedRental = rentalRepository.save(rental);
             return Optional.of(entityToDto(updatedRental));
