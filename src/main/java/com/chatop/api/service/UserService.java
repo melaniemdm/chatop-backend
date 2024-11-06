@@ -59,6 +59,19 @@ public class UserService {
 
     }
 
+    public Optional<UserDTO> getUserById(Long id){
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            System.out.println("Utilisateur trouvé  : " + user.get());
+        } else {
+            System.out.println("Aucun utilisateur trouvé pour l'id : " + id);
+        }
+
+        return user.map(this::entityToDto);
+    }
+
+
+
     // Méthode pour convertir un User en UserDTO
     public UserDTO entityToDto(User user) {
         UserDTO userDTO = new UserDTO();

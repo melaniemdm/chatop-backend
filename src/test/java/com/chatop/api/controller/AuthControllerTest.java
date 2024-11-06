@@ -13,8 +13,8 @@ import java.util.Collections;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = UserController.class)
-public class UserControllerTest {
+@WebMvcTest(controllers = AuthController.class)
+public class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockBean
