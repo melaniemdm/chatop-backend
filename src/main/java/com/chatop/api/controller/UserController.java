@@ -2,6 +2,14 @@ package com.chatop.api.controller;
 
 import com.chatop.api.dto.UserDTO;
 import com.chatop.api.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,21 +23,41 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
+@Tag(name = "User Management", description = "Operations related to managing users")
 public class UserController {
     @Autowired
     private UserService userService;
 
+    @Operation(summary = "Get user by ID", description = "Fetches a user by their unique ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class, example = """
+                            {
+                              "id": 2,
+                              "name": "Owner Name",
+                              "email": "test@test.com",
+                              "created_at": "2022/02/02",
+                              "updated_at": "2022/08/02"
+                            }
+                            """))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = "{\"error\": \"User not found\"}")))
+    })
+
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getUser(@PathVariable Long id){
+    public ResponseEntity<Map<String, Object>> getUser(
+            @Parameter(description = "ID of the user to be retrieved", example = "1") @PathVariable Long id) {
+
         Map<String, Object> response = new HashMap<>();
         Optional<UserDTO> userDTO = userService.getUserById(id);
-        if(userDTO.isPresent()){
+        if (userDTO.isPresent()) {
             response.put("id", id);
             response.put("name", userDTO.get().getName());
             response.put("email", userDTO.get().getEmail());
             response.put("created_at", userDTO.get().getCreatedAt());
             response.put("updated_at", userDTO.get().getUpdatedAt());
-        }else {
+        } else {
             return ResponseEntity.notFound().build();
         }
 

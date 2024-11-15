@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig  {
+public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
@@ -29,7 +29,8 @@ public class SecurityConfig  {
                         .requestMatchers(
                                 "/auth/register",
                                 "/auth/login",
-                                "/upload/pictures/**"
+                                "/upload/pictures/**",
+                                "/swagger-ui/**", "/v3/api-docs/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
