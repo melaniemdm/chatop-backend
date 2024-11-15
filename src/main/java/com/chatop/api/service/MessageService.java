@@ -27,6 +27,7 @@ public class MessageService {
         messageDTO.setUpdatedAt(message.getUpdatedAt());
         return messageDTO;
     }
+
     //Convertit un DTO en entité
     public Message dtoToEntity(MessageDTO messageDTO) {
         Message message = new Message();

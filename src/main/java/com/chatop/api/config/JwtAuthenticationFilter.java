@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 import java.util.Optional;
 
@@ -16,6 +17,7 @@ import java.util.Optional;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     //utilisé pour gérer et valider les tokens JWT
     private JwtService jwtService;
+
     // Constructeur injectant le service JwtService pour interagir avec les tokens JWT
     public JwtAuthenticationFilter(JwtService jwtService) {
         this.jwtService = jwtService;
@@ -33,6 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
     // Méthode pour extraire le token depuis l'en-tête Authorization
     private Optional<String> extractToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");

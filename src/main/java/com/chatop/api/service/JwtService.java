@@ -3,6 +3,7 @@ package com.chatop.api.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +27,7 @@ public class JwtService {
             return null;
         }
     }
+
     public String getIDFromToken(String token) {
         try {
             // Décoder la partie payload du token

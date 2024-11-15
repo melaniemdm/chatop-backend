@@ -6,6 +6,7 @@ import com.chatop.api.repository.RentalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,27 +18,25 @@ import java.util.List;
 import java.util.Optional;
 
 
-
 @Service
 public class RentalService {
     private final String uploadDirectory = "upload/pictures";
 
 
-@Autowired
+    @Autowired
     private RentalRepository rentalRepository;
 
-//Obtenir liste de tous les rentals en DTO
-public List<RentalDTO> getAllRentals() {
-    List<Rental> rentals = (List<Rental>) rentalRepository.findAll();
-    List<RentalDTO> rentalDTOs = new ArrayList<>();
+    //Obtenir liste de tous les rentals en DTO
+    public List<RentalDTO> getAllRentals() {
+        List<Rental> rentals = (List<Rental>) rentalRepository.findAll();
+        List<RentalDTO> rentalDTOs = new ArrayList<>();
 
-    for (Rental rental : rentals) {
-        rentalDTOs.add(entityToDto(rental));
+        for (Rental rental : rentals) {
+            rentalDTOs.add(entityToDto(rental));
+        }
+
+        return rentalDTOs;
     }
-
-    return rentalDTOs;
-}
-
 
 
     //Obtenir un rental par son id et le convertir en DTO
@@ -53,7 +52,7 @@ public List<RentalDTO> getAllRentals() {
     }
 
 
-public void createRental(RentalDTO rentalDTO, MultipartFile file) throws IOException {
+    public void createRental(RentalDTO rentalDTO, MultipartFile file) throws IOException {
         Rental rental = dtoToEntity(rentalDTO);
 
         // Vérifie et sauvegarde l'image si elle est présente
@@ -95,8 +94,9 @@ public void createRental(RentalDTO rentalDTO, MultipartFile file) throws IOExcep
 
 
     //Supprimer un rental
-public void deleteRental(Long id){
-    rentalRepository.deleteById(id);}
+    public void deleteRental(Long id) {
+        rentalRepository.deleteById(id);
+    }
 
     // Conversion d'une entité Rental en DTO
     private RentalDTO entityToDto(Rental rental) {

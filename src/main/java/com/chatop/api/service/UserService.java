@@ -7,6 +7,7 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -21,7 +22,7 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder; // Injection du PasswordEncoder
 
-    public UserDTO saveUser(UserDTO userDTO){
+    public UserDTO saveUser(UserDTO userDTO) {
         User user = dtoToEntity(userDTO);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setCreatedAt(LocalDateTime.now());
@@ -31,15 +32,16 @@ public class UserService {
     }
 
     // Méthode pour trouver un utilisateur par son ID
-    public Optional<UserDTO> getUser(final Long id){
-        Optional<User> user  = userRepository.findById(id);
+    public Optional<UserDTO> getUser(final Long id) {
+        Optional<User> user = userRepository.findById(id);
         return user.map(this::entityToDto);
     }
+
     public Iterable<User> getUsers() {
         return userRepository.findAll();
     }
 
-    public void deleteUser(final Long id){
+    public void deleteUser(final Long id) {
         userRepository.deleteById(id);
     }
 
@@ -55,11 +57,11 @@ public class UserService {
             System.out.println("Aucun utilisateur trouvé pour l'email : " + login);
         }
 
-      return user.map(this::entityToDto);
+        return user.map(this::entityToDto);
 
     }
 
-    public Optional<UserDTO> getUserById(Long id){
+    public Optional<UserDTO> getUserById(Long id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isPresent()) {
             System.out.println("Utilisateur trouvé  : " + user.get());
@@ -69,7 +71,6 @@ public class UserService {
 
         return user.map(this::entityToDto);
     }
-
 
 
     // Méthode pour convertir un User en UserDTO
