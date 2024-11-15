@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name="USERS") // NOM DE LA TABLE ASSOCIÉE
+@Table(name = "USERS") // NOM DE LA TABLE ASSOCIÉE
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,7 @@ public class User {
     private String password;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
@@ -53,11 +53,11 @@ public class User {
     }
 
     public LocalDateTime getCreatedAt() {
-        return createdAt;
+        return created_at;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+        this.created_at = createdAt;
     }
 
     public LocalDateTime getUpdatedAt() {

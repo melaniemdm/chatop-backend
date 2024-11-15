@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name="RENTALS") // NOM DE LA TABLE ASSOCIÉE
+@Table(name = "RENTALS") // NOM DE LA TABLE ASSOCIÉE
 public class Rental {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,7 @@ public class Rental {
     private Double price;
 
     @Column(name = "picture")
-     private String picture;
+    private String picture;
 
     @Column(name = "description", length = 2000)
     private String description;
@@ -32,21 +32,22 @@ public class Rental {
     private Integer ownerId;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    private LocalDateTime updated_at;
 
     // Méthode appelée avant la persistance de l'entité
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        created_at = LocalDateTime.now();
+        updated_at = LocalDateTime.now();
     }
+
     // Méthode appelée avant la mise à jour de l'entité
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updated_at = LocalDateTime.now();
     }
 
     // getter and setter
@@ -108,18 +109,18 @@ public class Rental {
     }
 
     public LocalDateTime getCreatedAt() {
-        return createdAt;
+        return created_at;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+        this.created_at = createdAt;
     }
 
     public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+        return updated_at;
     }
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+        this.updated_at = updatedAt;
     }
 }

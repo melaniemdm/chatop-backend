@@ -21,20 +21,20 @@ public class Message {
     private String message;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    private LocalDateTime updated_at;
 
     @PrePersist
     public void prePersist() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        created_at = LocalDateTime.now();
+        updated_at = LocalDateTime.now();
     }
 
     @PreUpdate
     public void preUpdate() {
-        updatedAt = LocalDateTime.now();
+        updated_at = LocalDateTime.now();
     }
 
     // Getters and Setters
@@ -72,18 +72,18 @@ public class Message {
     }
 
     public LocalDateTime getCreatedAt() {
-        return createdAt;
+        return created_at;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+        this.created_at = createdAt;
     }
 
     public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+        return updated_at;
     }
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+        this.updated_at = updatedAt;
     }
 }
