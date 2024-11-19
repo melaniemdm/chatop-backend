@@ -48,19 +48,23 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getUser(
             @Parameter(description = "ID of the user to be retrieved", example = "1") @PathVariable Long id) {
-
+        // Create a map to hold the response data.
         Map<String, Object> response = new HashMap<>();
+        // Fetch the user details using the userService.
         Optional<UserDTO> userDTO = userService.getUserById(id);
+        // Check if the user was found.
         if (userDTO.isPresent()) {
+            // Populate the response map with user details.
             response.put("id", id);
             response.put("name", userDTO.get().getName());
             response.put("email", userDTO.get().getEmail());
             response.put("created_at", userDTO.get().getCreatedAt());
             response.put("updated_at", userDTO.get().getUpdatedAt());
         } else {
+            // If the user is not found, return a 404 Not Found response.
             return ResponseEntity.notFound().build();
         }
-
+// Return the response with a 200 OK status.
         return ResponseEntity.ok(response);
     }
 }

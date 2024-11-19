@@ -50,29 +50,32 @@ public class AuthController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(example = "{\"email\": \"user@example.com\", \"password\": \"password123\"}")))
                                    @RequestBody Map<String, String> loginRequest) {
+        // Extract email and password from the request body
         String login = loginRequest.get("email");
         String password = loginRequest.get("password");
-
+        // Check if a user with the given email exists in the database
         Optional<UserDTO> foundUser = userService.getUserByLogin(login);
 
         if (foundUser.isEmpty()) {
+            // If no user is found, return a 404 Not Found response
             return ResponseEntity.status(404).body("User not found");
         }
-
+        // Retrieve the found user's details
         UserDTO user = foundUser.get();
 
-// Verifying password using BCryptPasswordEncoder
+        // Verify the provided password using BCryptPasswordEncoder.
+        // Compare the plain text password from the request with the hashed password stored in the database.
         boolean isPasswordValid = passwordEncoder.matches(password, user.getPassword());
         if (!isPasswordValid) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        // Generation of the JWT token for the authenticated user using the email as subject
+        // Generate a JWT token for the authenticated user.
+        // The token includes the user's email and ID as claims for identification purposes.
         String token = jwtService.generateToken(user.getEmail(), user.getId());
 
-        System.out.println("Token JWT généré : {}" + token);
 
-        // Response with token
+        // Return a 200 OK response with the generated JWT token
         return ResponseEntity.ok("{ \"token\": \"" + token + "\" }");
     }
 
@@ -98,16 +101,19 @@ public class AuthController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = UserDTO.class)))
                                           @RequestBody UserDTO userDTO) {
-        //Validate that the password is present
+        // Validate that the password is not null or empty
         if (userDTO.getPassword() == null || userDTO.getPassword().trim().isEmpty()) {
+            // If the password is missing, return a 400 Bad Request response
             return ResponseEntity.badRequest().body("Password is required");
         }
-        // User registration
+        // Save the new user's data using the userService
+        // This includes encrypting the password and storing the user in the database
         UserDTO savedUser = userService.saveUser(userDTO);
 
-        // Generation of the JWT token for the authenticated user using the email as subject
+        // Generate a JWT token for the newly registered user
+        // The token contains the user's email and ID for future authentication and identification
         String token = jwtService.generateToken(savedUser.getEmail(), savedUser.getId());
-
+        // Return a 200 OK response with the generated JWT token
         return ResponseEntity.ok().body("{ \"token\": \"" + token + "\" }");
     }
 
@@ -137,31 +143,33 @@ public class AuthController {
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getMe(@Parameter(hidden = true) HttpServletRequest request) {
-        // Récupération du token depuis l'en-tête Authorization
+        // Retrieve the token from the Authorization header
         String authHeader = request.getHeader("Authorization");
         String token = null;
 
         System.out.println("BEARER" + authHeader);
-
+        // Check if the Authorization header exists and contains a Bearer token
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7); // Remove the "Bearer" prefix
-
+            token = authHeader.substring(7); // Remove the "Bearer " prefix to get the token
         } else {
+            // If the token is not provided, return a 401 Unauthorized response with an appropriate error message
             return ResponseEntity.status(401).body(Map.of("error", "Token not provided"));
 
         }
 
-        // Validation du token et extraction de l'email (ou autre information utilisateur)
+        // Validate the token and extract the username (or other user-specific information)
         String username;
         try {
-            username = jwtService.getUsernameFromToken(token);
+            username = jwtService.getUsernameFromToken(token);// Extract the username from the token
 
             System.out.println("usernameController" + username);
-
+            // Check if the username is valid and the token has not expired
             if (username == null || !jwtService.validateToken(token, username)) {
+                // If the token is invalid or expired, return a 401 Unauthorized response
                 return ResponseEntity.status(401).body(Map.of("error", "Invalid or expired token"));
             }
         } catch (Exception exception) {
+            // Handle any exceptions that occur during token validation and return a 401 Unauthorized response
             return ResponseEntity.status(401).body(Map.of("error", "Token validation failed"));
         }
 
@@ -171,14 +179,14 @@ public class AuthController {
             return ResponseEntity.status(404).body(Map.of("error", "User not found"));
         }
 
-        // Build the response with user information and token
+        // Build the response with user details
         Map<String, Object> response = new HashMap<>();
         response.put("id", userDTO.get().getId());
         response.put("name", userDTO.get().getName());
         response.put("email", userDTO.get().getEmail());
         response.put("created_at", userDTO.get().getCreatedAt());
         response.put("updated_at", userDTO.get().getUpdatedAt());
-        // response.put("token", token);
+        // response.put("token", token);// (Optional) Add the token if needed
 
         return ResponseEntity.ok(response);
     }

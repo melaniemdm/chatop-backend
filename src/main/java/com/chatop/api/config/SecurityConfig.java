@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    // Constructor to inject the custom JWT authentication filter.
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
@@ -24,7 +25,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // Disable Cross-Site Request Forgery (CSRF) protection as this API uses stateless JWT authentication.
                 .csrf(csrf -> csrf.disable())
+                // Define authorization rules for endpoints.
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/register",
@@ -32,24 +35,27 @@ public class SecurityConfig {
                                 "/upload/pictures/**",
                                 "/swagger-ui/**", "/v3/api-docs/**"
                         ).permitAll()
+                        // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
-
+        // Add the custom JWT authentication filter before the default UsernamePasswordAuthenticationFilter.
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
+        // Return the SecurityFilterChain bean.
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+        // Configure BCryptPasswordEncoder for encoding and validating passwords securely.
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
+        // Expose the AuthenticationManager bean for use in authentication-related operations.
         return http.getSharedObject(AuthenticationManager.class);
     }
 }

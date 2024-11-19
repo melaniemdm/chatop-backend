@@ -16,9 +16,11 @@ public class MessageService {
         messageRepository.save(dtoToEntity(messageDTO));
     }
 
-    //Convertit une entité en DTO
+    // Converts an entity to a Data Transfer Object (DTO)
     public MessageDTO entityToDto(Message message) {
+        // Create a new instance of MessageDTO
         MessageDTO messageDTO = new MessageDTO();
+        // Map the fields from the entity (Message) to the DTO (MessageDTO)
         messageDTO.setId(message.getId());
         messageDTO.setRentalId(message.getRentalId());
         messageDTO.setUserId(message.getUserId());
@@ -28,9 +30,11 @@ public class MessageService {
         return messageDTO;
     }
 
-    //Convertit un DTO en entité
+    // Converts a Data Transfer Object (DTO) to an entity
     public Message dtoToEntity(MessageDTO messageDTO) {
+        // Create a new instance of Message (the entity)
         Message message = new Message();
+        // Map the fields from the DTO (MessageDTO) to the entity (Message)
         message.setId(messageDTO.getId());
         message.setRentalId(messageDTO.getRentalId());
         message.setUserId(messageDTO.getUserId());

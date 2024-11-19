@@ -75,26 +75,27 @@ public class MessageController {
             @RequestBody Map<String, Object> requestBody,
             @Parameter(hidden = true) HttpServletRequest request) {
 
-        // Get the JWT token from the Authorization header
+        // Retrieve the JWT token from the Authorization header
         String authHeader = request.getHeader("Authorization");
         String token = null;
-
+        // Check if the Authorization header contains a Bearer token
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7); // Remove the "Bearer" prefix
+            token = authHeader.substring(7); // Extract the token by removing the "Bearer " prefix
             System.out.println(token);
         }
-        // Use jwtService to extract user ID
+        // Extract the user ID from the token using the JwtService
         String userIdStr = null;
         if (token != null) {
-            userIdStr = jwtService.getIDFromToken(token); // Utilise getIDFromToken pour obtenir l'ID sous forme de chaîne
+            userIdStr = jwtService.getIDFromToken(token); // Decode the token to retrieve the user ID as a string
         }
-        // Checks that ID is not null before converting
+        // If the user ID is null, return a 401 Unauthorized response
         if (userIdStr == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Invalid or missing token."));
         }
         Integer userId;
         try {
+            // Convert the user ID from String to Integer
             userId = Integer.parseInt(userIdStr); // Converted to Integer if userIdStr is not null
         } catch (NumberFormatException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -104,25 +105,25 @@ public class MessageController {
         // Get the message and rentalId from the request body
         String message = (String) requestBody.get("message");
         Integer rentalId = (Integer) requestBody.get("rental_id");
-
+        // Validate that the message content is not null or empty
         if (message == null || message.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Message content cannot be empty"));
         }
 
-        // Vérifier que rentalId est présent
+        // Validate that the rental ID is provided in the request body
         if (rentalId == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Rental ID cannot be null"));
         }
 
-        // Create a new MessageDTO object (or any other object) to pass to the service
+        // Create a new MessageDTO object and populate it with the extracted data
         MessageDTO messageDTO = new MessageDTO();
         messageDTO.setMessage(message);
         messageDTO.setRentalId(rentalId);
         messageDTO.setUserId(userId); // Assigns user ID
 
-        // Création du message via le service
+        // Save the message via the MessageService
         messageService.createMessage(messageDTO);
-
+        // Return a 200 OK response indicating that the message was successfully created
         return ResponseEntity.ok().body(Map.of("message", "Message send with success"));
     }
 }

@@ -15,12 +15,17 @@ import org.springframework.context.annotation.Configuration;
         scheme = "bearer"
 )
 public class SwaggerConfig {
-
+    /**
+     * Swagger/OpenAPI configuration for documenting the application's endpoints.
+     *
+     * @return a customized instance of {@link OpenAPI}.
+     */
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
+                // Define general information about the API.
                 .info(new Info().title("Chatop API").version("1.0").description("API documentation for Chatop"))
-                //.addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                // Add a security scheme for handling JWT tokens.
                 .components(new io.swagger.v3.oas.models.Components()
                         .addSecuritySchemes("bearerAuth",
                                 new SecurityScheme()

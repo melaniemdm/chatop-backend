@@ -15,10 +15,10 @@ import java.util.Optional;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    //utilisé pour gérer et valider les tokens JWT
+    //used to manage and validate JWT tokens
     private JwtService jwtService;
 
-    // Constructeur injectant le service JwtService pour interagir avec les tokens JWT
+    // Constructor injecting the JwtService service to interact with JWT tokens
     public JwtAuthenticationFilter(JwtService jwtService) {
         this.jwtService = jwtService;
     }
@@ -27,16 +27,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        // Extraction et validation du token JWT
-        extractToken(request)// Récupère le token de l'en-tête Authorization
-                .flatMap(this::getValidUsername)// Valide le token et extrait le nom d'utilisateur s'il est valide
-                .filter(username -> SecurityContextHolder.getContext().getAuthentication() == null) // Vérifie qu'il n'y a pas d'authentification active dans le contexte
+        // Extraction and validation of the JWT token
+        extractToken(request)// Get the token from the Authorization header
+                .flatMap(this::getValidUsername)// Validates the token and extracts the username if valid
+                .filter(username -> SecurityContextHolder.getContext().getAuthentication() == null) // Checks that there is no active authentication in the context
                 .ifPresent(username -> setAuthentication(username, request));
 
         filterChain.doFilter(request, response);
     }
 
-    // Méthode pour extraire le token depuis l'en-tête Authorization
+    // Method to extract the token from the Authorization header
     private Optional<String> extractToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return Optional.empty();
     }
 
-    // Méthode pour valider le token et obtenir le nom d'utilisateur s'il est valide
+    // Method to validate the token and get the username if it is valid
     private Optional<String> getValidUsername(String token) {
         String username = jwtService.getUsernameFromToken(token);
         if (username != null && jwtService.validateToken(token, username)) {
@@ -54,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return Optional.empty();
     }
 
-    // Méthode pour authentifier l'utilisateur dans le contexte de sécurité de Spring
+    // Method to authenticate user in Spring security context
     private void setAuthentication(String username, HttpServletRequest request) {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(

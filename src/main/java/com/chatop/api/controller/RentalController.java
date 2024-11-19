@@ -79,8 +79,10 @@ public class RentalController {
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping
     public Map<String, List<RentalDTO>> getAllRentals() {
+        // Fetch all rentals using the RentalService.
         List<RentalDTO> rentalDTOs = rentalService.getAllRentals();
-        // Encapsulate the list in a Map with the "rentals" key
+        // Encapsulate the list of rentals in a Map with the key "rentals".
+        // This provides a clear structure for the response and improves readability in JSON responses.
         return Map.of("rentals", rentalDTOs);
     }
 
@@ -106,10 +108,14 @@ public class RentalController {
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/{id}")
     public ResponseEntity<RentalDTO> getRentalById(@Parameter(description = "ID of the rental to be retrieved", example = "1") @PathVariable Long id) {
+        // Fetch the rental by its ID using the RentalService.
         Optional<RentalDTO> rental = rentalService.getRentalById(id);
+        // Check if the rental exists.
         if (rental.isPresent()) {
+            // If the rental is found, return it with a 200 OK response.
             return ResponseEntity.ok(rental.get());
         } else {
+            // If the rental is not found, return a 404 Not Found response.
             return ResponseEntity.notFound().build();
         }
     }
@@ -152,31 +158,33 @@ public class RentalController {
             @Parameter(description = "Picture of the rental", content = @Content(mediaType = "multipart/form-data"))
             @RequestParam("picture") MultipartFile file,
             HttpServletRequest request) {
-
+        // Extract the Authorization token from the request header.
         String authHeader = request.getHeader("Authorization");
         String token = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7); // Remove the "Bearer" prefix
+            token = authHeader.substring(7); // Remove the "Bearer" prefix to extract the token.
         }
-        // Use jwtService to extract owner ID
+        // Use jwtService to extract the owner's ID from the token.
         String ownerIdStr = null;
         if (token != null) {
-            ownerIdStr = jwtService.getIDFromToken(token); // Utilise getIDFromToken pour obtenir l'ID sous forme de chaîne
+            ownerIdStr = jwtService.getIDFromToken(token); // Extract the owner ID as a string.
         }
+        // If no token or invalid token, return 401 Unauthorized.
         if (ownerIdStr == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "Invalid or missing token."));
         }
+        // Convert the owner ID from String to Integer.
         Integer owner_id;
         try {
-            owner_id = Integer.parseInt(ownerIdStr); // Convertir en Integer si ownerIdStr n'est pas null
+            owner_id = Integer.parseInt(ownerIdStr); // Ensure the ID is in valid numeric format.
         } catch (NumberFormatException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("message", "Invalid ID format in token."));
         }
 
-        // Creation of the rental DTO
+        // Create a RentalDTO object to encapsulate the rental details.
         RentalDTO rentalDTO = new RentalDTO();
         rentalDTO.setName(name);
         rentalDTO.setSurface(surface);
@@ -184,12 +192,14 @@ public class RentalController {
         rentalDTO.setDescription(description);
         rentalDTO.setOwnerId(owner_id);
         try {
+            // Use the rentalService to save the rental details along with the uploaded picture.
             rentalService.createRental(rentalDTO, file);
-            // Creating a Map object for the response
+            // Prepare and return the success response.
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Rental created !");
             return ResponseEntity.ok(response);
         } catch (Exception exception) {
+            // Catch and handle any server-side errors during rental creation.
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Failed to create rental."));
         }
@@ -218,19 +228,23 @@ public class RentalController {
                                                             @Parameter(description = "Price of the rental") @RequestParam("price") Double price,
                                                             @Parameter(description = "Description of the rental") @RequestParam("description") String description,
                                                             HttpServletRequest request) {
+        // Create a RentalDTO object to encapsulate the updated rental details.
         RentalDTO rentalDTO = new RentalDTO();
         rentalDTO.setId(id);
         rentalDTO.setName(name);
         rentalDTO.setSurface(surface);
         rentalDTO.setPrice(price);
         rentalDTO.setDescription(description);
+        // Use the rentalService to update the rental with the provided details
         Optional<RentalDTO> updatedRental = rentalService.updateRental(id, rentalDTO);
-
+        // Check if the rental was successfully updated.
         if (updatedRental.isPresent()) {
+            // Create a response map containing the success message.
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Rental updated !");
             return ResponseEntity.ok(response);
         } else {
+            // If the rental with the specified ID does not exist, return a 404 Not Found response.
             return ResponseEntity.notFound().build();
         }
     }
