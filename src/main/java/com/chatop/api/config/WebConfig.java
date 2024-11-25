@@ -27,6 +27,6 @@ public class WebConfig implements WebMvcConfigurer {
 
         // Example:
         // A file stored at /upload/pictures/image1.jpg will be accessible via:
-        // http://localhost:8080/upload/pictures/image1.jpg
+        // http://localhost:3001/upload/pictures/webimage1.jpg
     }
 }

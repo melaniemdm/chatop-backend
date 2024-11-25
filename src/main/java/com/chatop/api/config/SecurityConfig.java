@@ -2,7 +2,6 @@ package com.chatop.api.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -53,9 +52,5 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
-        // Expose the AuthenticationManager bean for use in authentication-related operations.
-        return http.getSharedObject(AuthenticationManager.class);
-    }
+
 }
